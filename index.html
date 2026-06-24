@@ -1,0 +1,636 @@
+PATCH ERROR — please fix and resend the patch.
+
+Error: Ambiguous match — patch not applied.
+
+This OLD block matches more than one location in the file.
+Send a larger, more unique chunk of surrounding code so the patch can target the exact spot.
+
+Current source:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centralized Network Sphere</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* Layered deep-space gradient */
+            background:
+                radial-gradient(ellipse 100% 80% at 18% 28%, #0c0820 0%, transparent 52%),
+                radial-gradient(ellipse 75% 95% at 82% 72%, #030a1d 0%, transparent 52%),
+                radial-gradient(ellipse 60% 60% at 55% 10%, #080515 0%, transparent 48%),
+                radial-gradient(ellipse at center, #010109 0%, #000000 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Nebula cloud atmosphere */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 52% 28% at 82% 10%, rgba(55, 8, 110, 0.32) 0%, transparent 65%),
+                radial-gradient(ellipse 38% 52% at 5%  90%, rgba(0,  38, 88,  0.28) 0%, transparent 65%),
+                radial-gradient(ellipse 28% 42% at 60% 92%, rgba(18, 2,  60,  0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 20% 25% at 45% 2%,  rgba(5,  20, 80,  0.18) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Cinematic vignette */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 28%, rgba(0, 0, 3, 0.68) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ─── Controls Panel ─── */
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(7, 5, 20, 0.72);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(115, 90, 220, 0.20);
+            box-shadow:
+                0 8px 40px rgba(0, 0, 0, 0.70),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+            z-index: 10;
+        }
+
+        /* Shimmer accent line at top of panel */
+        #controls::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 18px; right: 18px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(160, 130, 255, 0.60), transparent);
+            border-radius: 1px;
+        }
+
+        .control-group { margin-bottom: 15px; }
+        .control-group:last-child { margin-bottom: 0; }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: rgba(172, 158, 255, 0.58);
+        }
+
+        input[type="range"] {
+            width: 200px;
+            cursor: pointer;
+            accent-color: #ff1111;
+        }
+
+        /* ─── Load Folder Button ─── */
+        #btnLoadFolder {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(205, 195, 255, 0.85);
+            border: 1px solid rgba(125, 105, 235, 0.24);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, color 0.25s;
+        }
+        #btnLoadFolder:hover {
+            background: rgba(105, 85, 215, 0.14);
+            border-color: rgba(148, 125, 255, 0.48);
+            box-shadow: 0 0 18px rgba(90, 70, 210, 0.22);
+            color: rgba(228, 218, 255, 1);
+        }
+
+        #fileStats {
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(148, 138, 200, 0.42);
+            text-align: center;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        /* ─── Color Toggle Button ─── */
+        #colorToggle {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.20);
+            background: radial-gradient(circle at 38% 34%, rgba(255,255,255,0.30) 0%, var(--toggle-color, #ff1111) 68%);
+            cursor: pointer;
+            transition: transform 0.12s;
+            z-index: 100;
+            animation: buttonPulse 2.8s ease-in-out infinite;
+        }
+
+        /* Inner ring highlight */
+        #colorToggle::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            pointer-events: none;
+        }
+
+        /* Outer halo ring */
+        #colorToggle::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid var(--toggle-color, rgba(255, 17, 17, 0.35));
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 14px var(--toggle-shadow, rgba(255, 17, 17, 0.55)),
+                    0 0 32px var(--toggle-shadow, rgba(255, 17, 17, 0.22)),
+                    0 0 68px var(--toggle-shadow, rgba(255, 17, 17, 0.08));
+            }
+            50% {
+                box-shadow:
+                    0 0 24px var(--toggle-shadow, rgba(255, 17, 17, 0.78)),
+                    0 0 55px var(--toggle-shadow, rgba(255, 17, 17, 0.34)),
+                    0 0 105px var(--toggle-shadow, rgba(255, 17, 17, 0.14));
+            }
+        }
+
+        #colorToggle:active {
+            transform: translateX(-50%) scale(0.88);
+            animation: none;
+        }
+
+        /* ─── Image Popup ─── */
+        #imagePopup {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 6, 0.88);
+            backdrop-filter: blur(24px) saturate(115%);
+            -webkit-backdrop-filter: blur(24px) saturate(115%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s;
+        }
+        #imagePopup.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #imagePopup img {
+            max-width: 88%;
+            max-height: 88%;
+            border-radius: 12px;
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.95),
+                0 0 0 1px rgba(255, 255, 255, 0.07);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="controls">
+        <div class="control-group">
+            <button id="btnLoadFolder">📁 Load Local Folder</button>
+            <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
+            <div id="fileStats">Demo Mode: 1000 nodes</div>
+        </div>
+        <div class="control-group">
+            <label for="rotSpeed"><span>Rotation Speed</span></label>
+            <input type="range" id="rotSpeed" min="0" max="0.02" step="0.001" value="0.002">
+        </div>
+    </div>
+
+    <button id="colorToggle"></button>
+
+    <div id="imagePopup">
+        <button id="prevBtn" style="position:absolute;left:5%;font-size:30px;background:rgba(0,0,0,0.6);border:2px solid white;color:white;cursor:pointer;border-radius:50%;width:60px;height:60px;z-index:1001;transition:0.2s;display:flex;justify-content:center;align-items:center;">&#10094;</button>
+        <img id="popupImg" src="" alt="Preview">
+        <button id="nextBtn" style="position:absolute;right:5%;font-size:30px;background:rgba(0,0,0,0.6);border:2px solid white;color:white;cursor:pointer;border-radius:50%;width:60px;height:60px;z-index:1001;transition:0.2s;display:flex;justify-content:center;align-items:center;">&#10095;</button>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════
+        // 1. Scene Setup
+        // ═══════════════════════════════════════
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 14;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // ═══════════════════════════════════════
+        // 2. Sharp Dot Texture (original)
+        // ═══════════════════════════════════════
+        function createSharpDotTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.arc(32, 32, 32, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // ═══════════════════════════════════════
+        // ★ Visual: Deep Space Starfield
+        // ═══════════════════════════════════════
+        function buildStarfield() {
+            const COUNT = 2800;
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(COUNT * 3);
+            const col = new Float32Array(COUNT * 3);
+
+            // Subtle color palette — mostly white with cool/warm tints
+            const palette = [
+                [1.00, 1.00, 1.00],  // pure white
+                [0.78, 0.88, 1.00],  // cool blue-white
+                [1.00, 0.95, 0.80],  // warm star
+                [0.88, 0.80, 1.00],  // violet tint
+                [0.70, 0.86, 1.00],  // pale ice-blue
+                [1.00, 1.00, 0.90],  // slightly warm white
+            ];
+
+            for (let i = 0; i < COUNT; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi   = Math.acos(2 * Math.random() - 1);
+                const r     = 255 + Math.random() * 195; // far background shell
+
+                pos[i*3]     = r * Math.sin(phi) * Math.cos(theta);
+                pos[i*3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                pos[i*3 + 2] = r * Math.cos(phi);
+
+                const p      = palette[Math.floor(Math.random() * palette.length)];
+                const bright = 0.40 + Math.random() * 0.60;
+                col[i*3]     = p[0] * bright;
+                col[i*3 + 1] = p[1] * bright;
+                col[i*3 + 2] = p[2] * bright;
+            }
+
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+
+            // Soft glow star texture
+            const sc = document.createElement('canvas');
+            sc.width = sc.height = 32;
+            const sx = sc.getContext('2d');
+            const sg = sx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            sg.addColorStop(0,    'rgba(255,255,255,1.0)');
+            sg.addColorStop(0.22, 'rgba(215,228,255,0.72)');
+            sg.addColorStop(0.60, 'rgba(160,190,255,0.18)');
+            sg.addColorStop(1,    'rgba(80,120,255,0.00)');
+            sx.fillStyle = sg;
+            sx.fillRect(0, 0, 32, 32);
+
+            const mat = new THREE.PointsMaterial({
+                size: 1.5,
+                map: new THREE.CanvasTexture(sc),
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.82,
+                depthWrite: false,
+                sizeAttenuation: true,
+            });
+
+            const stars = new THREE.Points(geo, mat);
+            scene.add(stars);
+            return stars;
+        }
+        const starfield = buildStarfield();
+
+        // ═══════════════════════════════════════
+        // ★ Visual: Central Ambient Glow
+        // ═══════════════════════════════════════
+        function buildCenterGlow() {
+            const gc = document.createElement('canvas');
+            gc.width = gc.height = 256;
+            const gx = gc.getContext('2d');
+            const gg = gx.createRadialGradient(128, 128, 0, 128, 128, 128);
+            gg.addColorStop(0,    'rgba(255,255,255,0.60)');
+            gg.addColorStop(0.30, 'rgba(255,255,255,0.22)');
+            gg.addColorStop(0.65, 'rgba(255,255,255,0.05)');
+            gg.addColorStop(1,    'rgba(0,0,0,0)');
+            gx.fillStyle = gg;
+            gx.fillRect(0, 0, 256, 256);
+
+            const mat = new THREE.SpriteMaterial({
+                map: new THREE.CanvasTexture(gc),
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                color: new THREE.Color(0xff1111), // starts red, updates with toggle
+            });
+            const glow = new THREE.Sprite(mat);
+            glow.scale.setScalar(15);
+            scene.add(glow); // NOT inside network group — stays centered in world
+            return glow;
+        }
+
+        // ═══════════════════════════════════════
+        // 3. Network Group
+        // ═══════════════════════════════════════
+        const network = new THREE.Group();
+        scene.add(network);
+
+        // 4. Central Node
+        const centerGeometry = new THREE.SphereGeometry(0.35, 32, 32);
+        const centerMaterial = new THREE.MeshBasicMaterial({ color: 0x3388ff });
+        const centerNode = new THREE.Mesh(centerGeometry, centerMaterial);
+        network.add(centerNode);
+
+        // ═══════════════════════════════════════
+        // 5. Categories & Network Logic (original)
+        // ═══════════════════════════════════════
+        let currentParticleNodes, currentConnections, spriteGroup;
+        let fileCounts = { images: 1000, videos: 1000, softwares: 1000, docs: 1000 };
+        let categorizedFiles = { images: [], videos: [], softwares: [], docs: [] };
+        let objectURLs = [];
+
+        const categories = [
+            { id: 'images',    name: 'Images',    node: 0xff1111, line: 0x884433, ui: '#ff1111', shadow: 'rgba(255, 17, 17, 0.5)'  },
+            { id: 'videos',    name: 'Videos',    node: 0x1188ff, line: 0x334488, ui: '#1188ff', shadow: 'rgba(17, 136, 255, 0.5)' },
+            { id: 'softwares', name: 'Softwares', node: 0x11ff44, line: 0x338844, ui: '#11ff44', shadow: 'rgba(17, 255, 68, 0.5)'  },
+            { id: 'docs',      name: 'Docs',      node: 0xffaa11, line: 0x886633, ui: '#ffaa11', shadow: 'rgba(255, 170, 17, 0.5)' }
+        ];
+        let colorIndex = 0;
+
+        // Initialize CSS variables for button animation
+        document.documentElement.style.setProperty('--toggle-color',  categories[0].ui);
+        document.documentElement.style.setProperty('--toggle-shadow', categories[0].shadow);
+
+        // Build center glow after categories are defined
+        const centerGlow = buildCenterGlow();
+
+        function cleanupNetwork() {
+            if (currentParticleNodes) network.remove(currentParticleNodes);
+            if (currentConnections)   network.remove(currentConnections);
+            if (spriteGroup)          network.remove(spriteGroup);
+            objectURLs.forEach(url => URL.revokeObjectURL(url));
+            objectURLs = [];
+            spriteGroup = null;
+            currentParticleNodes = null;
+        }
+
+        function buildNetwork(count, nodeColorHex, lineColorHex, catId) {
+            cleanupNetwork();
+
+            const renderCount = count === 0 ? 1 : count;
+            const radius = 8;
+
+            const nodeGeometry = new THREE.BufferGeometry();
+            const lineGeometry = new THREE.BufferGeometry();
+            const nodePositions = new Float32Array(renderCount * 3);
+            const linePositions = new Float32Array(renderCount * 6);
+
+            const isImagePreview = (catId === 'images' && categorizedFiles.images.length > 0);
+            if (isImagePreview) spriteGroup = new THREE.Group();
+
+            for (let i = 0; i < renderCount; i++) {
+                const phi   = Math.acos(-1 + (2 * i) / renderCount);
+                const theta = Math.sqrt(renderCount * Math.PI) * phi;
+
+                const x = radius * Math.cos(theta) * Math.sin(phi);
+                const y = radius * Math.sin(theta) * Math.sin(phi);
+                const z = radius * Math.cos(phi);
+
+                nodePositions[i * 3]     = x;
+                nodePositions[i * 3 + 1] = y;
+                nodePositions[i * 3 + 2] = z;
+
+                linePositions[i * 6]     = 0; linePositions[i * 6 + 1] = 0; linePositions[i * 6 + 2] = 0;
+                linePositions[i * 6 + 3] = x; linePositions[i * 6 + 4] = y; linePositions[i * 6 + 5] = z;
+
+                if (isImagePreview && i < categorizedFiles.images.length) {
+                    if (i < 300) {
+                        const file = categorizedFiles.images[i];
+                        const url  = URL.createObjectURL(file);
+                        objectURLs.push(url);
+                        const imageIndex = objectURLs.length - 1;
+
+                        const img = new Image();
+                        img.onload = () => {
+                            const maxDim = 256;
+                            let w = img.width, h = img.height;
+                            if (w > h) { h = (h / w) * maxDim; w = maxDim; }
+                            else       { w = (w / h) * maxDim; h = maxDim; }
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = w; canvas.height = h;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, w, h);
+                            ctx.lineWidth = 8;
+                            ctx.strokeStyle = '#ffffff';
+                            ctx.strokeRect(0, 0, w, h);
+
+                            const texture  = new THREE.CanvasTexture(canvas);
+                            const material = new THREE.SpriteMaterial({ map: texture });
+                            const sprite   = new THREE.Sprite(material);
+                            sprite.position.set(x, y, z);
+                            const scaleBase = 1.0;
+                            sprite.scale.set((w / maxDim) * scaleBase, (h / maxDim) * scaleBase, 1);
+                            sprite.userData = { isImageNode: true, fileUrl: url, index: imageIndex };
+                            spriteGroup.add(sprite);
+                        };
+                        img.src = url;
+                    }
+                }
+            }
+
+            if (!isImagePreview) {
+                nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
+                const nodeMaterial = new THREE.PointsMaterial({
+                    size: 0.3,
+                    map: createSharpDotTexture(),
+                    color: nodeColorHex,
+                    transparent: true,
+                    alphaTest: 0.5,
+                    opacity: count === 0 ? 0 : 1
+                });
+                currentParticleNodes = new THREE.Points(nodeGeometry, nodeMaterial);
+                network.add(currentParticleNodes);
+            } else {
+                network.add(spriteGroup);
+            }
+
+            lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: lineColorHex,
+                transparent: true,
+                opacity: count === 0 ? 0 : 0.35
+            });
+            currentConnections = new THREE.LineSegments(lineGeometry, lineMaterial);
+            network.add(currentConnections);
+        }
+
+        // Initial build
+        buildNetwork(fileCounts.images, categories[0].node, categories[0].line, categories[0].id);
+
+        // ═══════════════════════════════════════
+        // 6. DOM References
+        // ═══════════════════════════════════════
+        const rotSpeedInput = document.getElementById('rotSpeed');
+        const colorToggle   = document.getElementById('colorToggle');
+        const btnLoadFolder = document.getElementById('btnLoadFolder');
+        const folderInput   = document.getElementById('folderInput');
+        const fileStats     = document.getElementById('fileStats');
+        const imagePopup    = document.getElementById('imagePopup');
+        const popupImg      = document.getElementById('popupImg');
+        const prevBtn       = document.getElementById('prevBtn');
+        const nextBtn       = document.getElementById('nextBtn');
+        var currentPopupIndex = 0;
+
+        // 7. Folder Parsing
+        btnLoadFolder.addEventListener('click', () => folderInput.click());
+
+        folderInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            fileCounts       = { images: 0, videos: 0, softwares: 0, docs: 0 };
+            categorizedFiles = { images: [], videos: [], softwares: [], docs: [] };
+
+            for (let i = 0; i < files.length; i++) {
+                const ext = files[i].name.split('.').pop().toLowerCase();
+                if      (['jpg','jpeg','png','gif','webp','svg','ico'].includes(ext))       { fileCounts.images++;    categorizedFiles.images.push(files[i]);    }
+                else if (['mp4','mkv','avi','mov','webm','flv'].includes(ext))              { fileCounts.videos++;    categorizedFiles.videos.push(files[i]);    }
+                else if (['exe','dmg','sh','apk','bat','msi','app'].includes(ext))          { fileCounts.softwares++; categorizedFiles.softwares.push(files[i]); }
+                else if (['pdf','txt','doc','docx','md','csv','json','xlsx'].includes(ext)) { fileCounts.docs++;      categorizedFiles.docs.push(files[i]);      }
+            }
+
+            const current = categories[colorIndex];
+            fileStats.innerText = `${current.name}: ${fileCounts[current.id]} files`;
+            buildNetwork(fileCounts[current.id], current.node, current.line, current.id);
+        });
+
+        // 8. Category Toggle
+        colorToggle.addEventListener('click', () => {
+            colorIndex = (colorIndex + 1) % categories.length;
+            const current = categories[colorIndex];
+
+            buildNetwork(fileCounts[current.id], current.node, current.line, current.id);
+
+            // Update slider accent
+            rotSpeedInput.style.accentColor = current.ui;
+
+            // Drive button gradient & pulse animation via CSS variables
+            document.documentElement.style.setProperty('--toggle-color',  current.ui);
+            document.documentElement.style.setProperty('--toggle-shadow', current.shadow);
+
+            // Shift ambient center glow to match category
+            centerGlow.material.color.setStyle(current.ui);
+
+            fileStats.innerText = folderInput.files.length > 0
+                ? `${current.name}: ${fileCounts[current.id]} files`
+                : `Demo Mode: 1000 nodes`;
+        });
+
+        // 8.5 Raycaster — image node clicks
+        const raycaster = new THREE.Raycaster();
+        const mouse     = new THREE.Vector2();
+
+        window.addEventListener('click', (event) => {
+            if (imagePopup.classList.contains('active')) return;
+
+            mouse.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            if (spriteGroup) {
+                const intersects = raycaster.intersectObjects(spriteGroup.children);
+                if (intersects.length > 0) {
+                    const object = intersects[0].object;
+                    if (object.userData.isImageNode) {
+                        currentPopupIndex = object.userData.index;
+                        popupImg.src = objectURLs[currentPopupIndex];
+                        imagePopup.classList.add('active');
+                    }
+                }
+            }
+        });
+
+        imagePopup.addEventListener('click', (e) => {
+            if (e.target === prevBtn || e.target === nextBtn) return;
+            imagePopup.classList.remove('active');
+            setTimeout(() => { popupImg.src = ''; }, 300);
+        });
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (objectURLs.length > 0) {
+                currentPopupIndex = (currentPopupIndex - 1 + objectURLs.length) % objectURLs.length;
+                popupImg.src = objectURLs[currentPopupIndex];
+            }
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (objectURLs.length > 0) {
+                currentPopupIndex = (currentPopupIndex + 1) % objectURLs.length;
+                popupImg.src = objectURLs[currentPopupIndex];
+            }
+        });
+
+        // ═══════════════════════════════════════
+        // 9. Animation Loop
+        // ═══════════════════════════════════════
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const rotationSpeed = parseFloat(rotSpeedInput.value);
+            network.rotation.y += rotationSpeed;
+            network.rotation.x += rotationSpeed * 0.3;
+
+            // Imperceptibly slow starfield drift — adds depth without distraction
+            starfield.rotation.y += 0.000072;
+            starfield.rotation.x += 0.000026;
+
+            renderer.render(scene, camera);
+        }
+
+        // 10. Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
